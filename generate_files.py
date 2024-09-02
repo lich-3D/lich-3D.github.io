@@ -1,18 +1,13 @@
 import os
 import jinja2
-import re
-
-# 自然排序函数
-def natural_sort_key(s):
-    return [int(text) if text.isdigit() else text.lower() for text in re.split('(\d+)', s)]
 
 # 模板内容
 markdown_template = """# 王叔叔3D打印工坊产品介绍
 ----------------------
 |序号|模型名称  |模型尺寸|说明  |链接地址|
 |----|-------   |-------|--------|----|
-{% for product in products -%}
-|{{ product.index }}|{{ product.name }}|{{ product.size }}|{{ product.description }}|[https://3d.lich.tech/{{ product.index }}.html](https://3d.lich.tech/{{ product.index }}.html)|
+{% for product in products %}
+|{{ product['index'] }}|{{ product['name'] }}|{{ product['size'] }}|{{ product['description'] }}|[https://3d.lich.tech/{{ product['index'] }}.html](https://3d.lich.tech/{{ product['index'] }}.html)|
 {% endfor %}
 """
 
@@ -21,7 +16,7 @@ html_template = """<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D模型 - {{ product.name }}</title>
+    <title>3D模型 - {{ product['name'] }}</title>
     <style>
         body {
             font-family: "Microsoft YaHei", Arial, sans-serif;
@@ -80,64 +75,86 @@ html_template = """<!DOCTYPE html>
 </head>
 <body>
     <div class="page-content">
-        <h1>{{ product.name }}</h1>
-        {% for image in product.images %}
-        <img src="{{ image }}" alt="{{ product.name }}">
+        <h1>{{ product['name'] }}</h1>
+        {% for image in product['images'] %}
+        <img src="{{ image }}" alt="{{ product['name'] }}">
         {% endfor %}
         <div class="product-info">
-            <p><strong>描述：</strong> {{ product.description }}</p>
-            <p><strong>尺寸：</strong> {{ product.size }}</p>
+            <p><strong>描述：</strong> {{ product['description'] }}</p>
+            <p><strong>尺寸：</strong> {{ product['size'] }}</p>
         </div>
     </div>
 
     <div class="navigation">
-        {% if product.prev_index %}
-        <a href="https://3d.lich.tech/{{ product.prev_index }}.html">上一页</a>
+        {% if product['prev_index'] %}
+        <a href="https://3d.lich.tech/{{ product['prev_index'] }}.html">上一页</a>
         {% endif %}
-        {% if product.next_index %}
-        <a href="https://3d.lich.tech/{{ product.next_index }}.html">下一页</a>
+        {% if product['next_index'] %}
+        <a href="https://3d.lich.tech/{{ product['next_index'] }}.html">下一页</a>
         {% endif %}
     </div>
 </body>
 </html>
 """
 
-# 假设模型数据，实际数据可以从文件夹中解析
-products = {}
+# 读取现有的Markdown文件
+markdown_file = "README.md"
+if os.path.exists(markdown_file):
+    with open(markdown_file, "r", encoding="utf-8") as md_file:
+        md_content = md_file.read()
+else:
+    md_content = ""
 
-# 收集所有以"-"分隔的图片文件，归类到相应的index
-for file in sorted(os.listdir('.'), key=natural_sort_key):
-    if file.endswith('.jpg'):
-        index = file.split('-')[0]
-        if index not in products:
+# 提取现有产品数据
+products = {}
+if md_content:
+    for line in md_content.splitlines():
+        if line.startswith("|") and "序号" not in line:
+            parts = line.split("|")
+            index = parts[1].strip()
             products[index] = {
                 "index": index,
-                "name": file.split('-')[1].split('.')[0],  # 使用文件名作为模型名称
-                "size": "未知尺寸",  # 你可以根据实际情况解析尺寸
-                "description": f"这是一个{file.split('-')[1].split('.')[0]}3D打印模型",  # 简单描述
-                "images": [f"https://3d.lich.tech/{file}"]
+                "name": parts[2].strip(),
+                "size": parts[3].strip(),
+                "description": parts[4].strip(),
+                "images": [],
+                "prev_index": None,
+                "next_index": None
             }
+
+# 更新Markdown内容
+new_entries = []
+for file in sorted(os.listdir('.')):
+    if file.endswith('.jpg'):
+        index = file.split('-')[0]
+        if index in products:
+            products[index]['images'].append(f"https://3d.lich.tech/{file}")
         else:
-            products[index]["images"].append(f"https://3d.lich.tech/{file}")
+            product_name = file.split('-')[1].split('.')[0]
+            products[index] = {
+                "index": index,
+                "name": product_name,
+                "size": "未知尺寸",
+                "description": f"这是一个{product_name}3D打印模型",
+                "images": [f"https://3d.lich.tech/{file}"],
+                "prev_index": None,
+                "next_index": None
+            }
+            new_entries.append(products[index])
 
-# 生成 markdown 并写入 README.md
-with open("README.md", "w", encoding="utf-8") as md_file:
-    md_content = jinja2.Template(markdown_template).render(products=products.values())
-    md_file.write(md_content)
+# 将新条目写入Markdown文件
+if new_entries:
+    with open(markdown_file, "w", encoding="utf-8") as md_file:
+        # 重新渲染完整的Markdown内容
+        md_file.write(jinja2.Template(markdown_template).render(products=sorted(products.values(), key=lambda x: int(x['index']))))
 
-# 生成 html 文件
-product_list = list(products.values())
+# 生成HTML文件
+product_list = list(sorted(products.values(), key=lambda x: int(x['index'])))
 for i, product in enumerate(product_list):
     if i > 0:
         product['prev_index'] = product_list[i - 1]['index']
-    else:
-        product['prev_index'] = None
-
     if i < len(product_list) - 1:
         product['next_index'] = product_list[i + 1]['index']
-    else:
-        product['next_index'] = None
 
     with open(f"{product['index']}.html", "w", encoding="utf-8") as html_file:
-        html_content = jinja2.Template(html_template).render(product=product)
-        html_file.write(html_content)
+        html_file.write(jinja2.Template(html_template).render(product=product))

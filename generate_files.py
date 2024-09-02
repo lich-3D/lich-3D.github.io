@@ -116,7 +116,7 @@ for file in sorted(os.listdir('.')):
             products[index]["images"].append(f"https://3d.lich.tech/{file}")
 
 # 生成 markdown
-with open("products.md", "w", encoding="utf-8") as md_file:
+with open("README.md", "w", encoding="utf-8") as md_file:
     md_content = jinja2.Template(markdown_template).render(products=products.values())
     md_file.write(md_content)
 

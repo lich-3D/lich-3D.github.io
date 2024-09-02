@@ -1,4 +1,5 @@
 import os
+import math
 import jinja2
 
 # 模板内容
@@ -37,12 +38,24 @@ html_template = """<!DOCTYPE html>
             text-align: center;
             box-sizing: border-box;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
-        .page-content img {
+        .images-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+        .images-container img {
             max-width: 100%;
-            max-height: calc(29.7cm - 10cm); /* 确保图片适应页面 */
             height: auto;
-            margin-top: 20px;
+            margin-top: 10px;
+            /* 动态设置最大高度 */
+            max-height: {{ max_image_height }}cm;
         }
         .product-info {
             margin-top: 20px;
@@ -52,7 +65,7 @@ html_template = """<!DOCTYPE html>
             font-size: 18px;
         }
         .navigation {
-            margin-top: 30px;
+            margin-top: 20px;
         }
         .navigation a {
             margin-right: 10px;
@@ -71,28 +84,32 @@ html_template = """<!DOCTYPE html>
             .navigation {
                 display: none;
             }
+            .images-container {
+                overflow: visible;
+            }
         }
     </style>
 </head>
 <body>
     <div class="page-content">
         <h1>{{ product['name'] }}</h1>
-        {% for image in product['images'] %}
-        <img src="{{ image }}" alt="{{ product['name'] }}">
-        {% endfor %}
+        <div class="images-container">
+            {% for image in product['images'] %}
+            <img src="{{ image }}" alt="{{ product['name'] }}">
+            {% endfor %}
+        </div>
         <div class="product-info">
             <p><strong>描述：</strong> {{ product['description'] }}</p>
             <p><strong>尺寸：</strong> {{ product['size'] }}</p>
         </div>
-    </div>
-
-    <div class="navigation">
-        {% if product['prev_index'] %}
-        <a href="https://3d.lich.tech/{{ product['prev_index'] }}.html">上一页</a>
-        {% endif %}
-        {% if product['next_index'] %}
-        <a href="https://3d.lich.tech/{{ product['next_index'] }}.html">下一页</a>
-        {% endif %}
+        <div class="navigation">
+            {% if product['prev_index'] %}
+            <a href="https://3d.lich.tech/{{ product['prev_index'] }}.html">上一页</a>
+            {% endif %}
+            {% if product['next_index'] %}
+            <a href="https://3d.lich.tech/{{ product['next_index'] }}.html">下一页</a>
+            {% endif %}
+        </div>
     </div>
 </body>
 </html>
@@ -155,6 +172,8 @@ if new_entries:
 
 # 生成HTML文件
 product_list = list(sorted(products.values(), key=lambda x: int(x['index'])))
+total_available_height_cm = 29.7 - 5  # 减去标题、描述和导航的大致高度（单位：cm）
+
 for i, product in enumerate(product_list):
     if i > 0:
         product['prev_index'] = product_list[i - 1]['index']
@@ -163,8 +182,17 @@ for i, product in enumerate(product_list):
 
     html_file_path = f"{product['index']}.html"
     if product['images']:  # 如果有图片才生成HTML文件
+        num_images = len(product['images'])
+        if num_images > 0:
+            # 动态计算每张图片的最大高度
+            max_image_height = math.floor(total_available_height_cm / num_images * 10) / 10  # 保留一位小数
+            # 设置一个最小高度，防止图片过小
+            max_image_height = max(max_image_height, 5)
+        else:
+            max_image_height = 10  # 默认值
+
         with open(html_file_path, "w", encoding="utf-8") as html_file:
-            html_file.write(jinja2.Template(html_template).render(product=product))
+            html_file.write(jinja2.Template(html_template).render(product=product, max_image_height=max_image_height))
     elif os.path.exists(html_file_path):
         # 如果没有图片且HTML文件存在，则删除HTML文件
         os.remove(html_file_path)

@@ -48,10 +48,12 @@ html_template = """<!DOCTYPE html>
         }
         .image-container img {
             max-width: 100%;
-            max-height: 100%;
+            max-height: calc(100% / {{ product['images']|length }}); /* 根据图片数量调整每张图片的最大高度 */
             height: auto;
             width: auto;
             object-fit: contain;
+            margin-top: 5px;
+            margin-bottom: 5px;
         }
         .product-info {
             margin-top: 20px;

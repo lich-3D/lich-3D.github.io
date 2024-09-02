@@ -2,7 +2,6 @@
 ----------------------
 |序号|模型名称  |模型尺寸|说明  |链接地址|
 |----|-------   |-------|--------|----|
-
 |1|12CM迷你龙|未知尺寸|这是一个12CM迷你龙3D打印模型|[https://3d.lich.tech/1.html](https://3d.lich.tech/1.html)|
 |10|鲨鱼|未知尺寸|这是一个鲨鱼3D打印模型|[https://3d.lich.tech/10.html](https://3d.lich.tech/10.html)|
 |2|15cm鲸鱼|未知尺寸|这是一个15cm鲸鱼3D打印模型|[https://3d.lich.tech/2.html](https://3d.lich.tech/2.html)|

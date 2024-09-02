@@ -1,0 +1,39 @@
+name: Generate Markdown and HTML
+
+on:
+  push:
+    branches:
+      - main  # 你可以指定其他分支
+    paths:
+      - '*.jpg'  # 只在提交包含jpg图片时触发
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        pip install jinja2
+
+    - name: Generate Markdown and HTML files
+      run: |
+        python generate_files.py
+
+    - name: Commit and push changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add products.md *.html
+        git commit -m "Auto-generate Markdown and HTML files"
+        git push origin main
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

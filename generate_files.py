@@ -1,13 +1,19 @@
 import os
 import jinja2
+import re
+
+# 自然排序函数
+def natural_sort_key(s):
+    return [int(text) if text.isdigit() else text.lower() for text in re.split('(\d+)', s)]
 
 # 模板内容
 markdown_template = """# 王叔叔3D打印工坊产品介绍
 ----------------------
 |序号|模型名称  |模型尺寸|说明  |链接地址|
 |----|-------   |-------|--------|----|
-{% for product in products %}
-|{{ product.index }}|{{ product.name }}|{{ product.size }}|{{ product.description }}|[https://3d.lich.tech/{{ product.index }}.html](https://3d.lich.tech/{{ product.index }}.html)|{% endfor %}
+{% for product in products -%}
+|{{ product.index }}|{{ product.name }}|{{ product.size }}|{{ product.description }}|[https://3d.lich.tech/{{ product.index }}.html](https://3d.lich.tech/{{ product.index }}.html)|
+{% endfor %}
 """
 
 html_template = """<!DOCTYPE html>
@@ -100,7 +106,7 @@ html_template = """<!DOCTYPE html>
 products = {}
 
 # 收集所有以"-"分隔的图片文件，归类到相应的index
-for file in sorted(os.listdir('.')):
+for file in sorted(os.listdir('.'), key=natural_sort_key):
     if file.endswith('.jpg'):
         index = file.split('-')[0]
         if index not in products:

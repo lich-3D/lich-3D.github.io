@@ -98,34 +98,41 @@ html_template = """<!DOCTYPE html>
 """
 
 # 假设模型数据，实际数据可以从文件夹中解析
-products = []
+products = {}
 
-index = 1
+# 收集所有以"-"分隔的图片文件，归类到相应的index
 for file in sorted(os.listdir('.')):
     if file.endswith('.jpg'):
-        product_name = os.path.splitext(file)[0]
-        product_size = "12x5x5厘米"  # 你可以根据实际情况解析尺寸
-        product_description = f"这是一个{product_name.split('-')[-1]}3D打印模型"  # 简单描述
-        product_images = [f"https://3d.lich.tech/{file}"]
-        product = {
-            "index": index,
-            "name": product_name,
-            "size": product_size,
-            "description": product_description,
-            "images": product_images,
-            "prev_index": index - 1 if index > 1 else None,
-            "next_index": index + 1
-        }
-        products.append(product)
-        index += 1
+        index = file.split('-')[0]
+        if index not in products:
+            products[index] = {
+                "index": index,
+                "name": file.split('-')[1].split('.')[0],  # 使用文件名作为模型名称
+                "size": "未知尺寸",  # 你可以根据实际情况解析尺寸
+                "description": f"这是一个{file.split('-')[1].split('.')[0]}3D打印模型",  # 简单描述
+                "images": [f"https://3d.lich.tech/{file}"]
+            }
+        else:
+            products[index]["images"].append(f"https://3d.lich.tech/{file}")
 
 # 生成 markdown
 with open("products.md", "w", encoding="utf-8") as md_file:
-    md_content = jinja2.Template(markdown_template).render(products=products)
+    md_content = jinja2.Template(markdown_template).render(products=products.values())
     md_file.write(md_content)
 
 # 生成 html 文件
-for product in products:
+product_list = list(products.values())
+for i, product in enumerate(product_list):
+    if i > 0:
+        product['prev_index'] = product_list[i - 1]['index']
+    else:
+        product['prev_index'] = None
+
+    if i < len(product_list) - 1:
+        product['next_index'] = product_list[i + 1]['index']
+    else:
+        product['next_index'] = None
+
     with open(f"{product['index']}.html", "w", encoding="utf-8") as html_file:
         html_content = jinja2.Template(html_template).render(product=product)
         html_file.write(html_content)

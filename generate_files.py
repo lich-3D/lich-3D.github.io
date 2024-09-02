@@ -111,16 +111,20 @@ if md_content:
     for line in md_content.splitlines():
         if line.startswith("|") and "序号" not in line:
             parts = line.split("|")
-            index = parts[1].strip()
-            products[index] = {
-                "index": index,
-                "name": parts[2].strip(),
-                "size": parts[3].strip(),
-                "description": parts[4].strip(),
-                "images": [],
-                "prev_index": None,
-                "next_index": None
-            }
+            try:
+                index = str(int(parts[1].strip()))  # 仅处理有效的数字序号
+                products[index] = {
+                    "index": index,
+                    "name": parts[2].strip(),
+                    "size": parts[3].strip(),
+                    "description": parts[4].strip(),
+                    "images": [],
+                    "prev_index": None,
+                    "next_index": None
+                }
+            except ValueError:
+                # 忽略无法转换为数字的索引行
+                continue
 
 # 更新Markdown内容
 new_entries = []
@@ -156,5 +160,10 @@ for i, product in enumerate(product_list):
     if i < len(product_list) - 1:
         product['next_index'] = product_list[i + 1]['index']
 
-    with open(f"{product['index']}.html", "w", encoding="utf-8") as html_file:
-        html_file.write(jinja2.Template(html_template).render(product=product))
+    html_file_path = f"{product['index']}.html"
+    if product['images']:  # 如果有图片才生成HTML文件
+        with open(html_file_path, "w", encoding="utf-8") as html_file:
+            html_file.write(jinja2.Template(html_template).render(product=product))
+    elif os.path.exists(html_file_path):
+        # 如果没有图片且HTML文件存在，则删除HTML文件
+        os.remove(html_file_path)

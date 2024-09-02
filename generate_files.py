@@ -38,23 +38,32 @@ html_template = """<!DOCTYPE html>
             box-sizing: border-box;
             overflow: hidden;
         }
-        .page-content img {
+        .image-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 70%; /* 固定高度，确保图片不会占用过多空间 */
+            overflow: hidden;
+        }
+        .image-container img {
             max-width: 100%;
-            max-height: {{ 100 / product['images']|length }}%;
+            max-height: 100%;
             height: auto;
             width: auto;
-            margin-top: 20px;
             object-fit: contain;
         }
         .product-info {
             margin-top: 20px;
+            height: 20%; /* 预留空间给说明文字 */
+            overflow: hidden;
         }
         .product-info p {
             margin: 5px 0;
             font-size: 18px;
         }
         .navigation {
-            margin-top: 30px;
+            margin-top: 10px;
         }
         .navigation a {
             margin-right: 10px;
@@ -79,9 +88,11 @@ html_template = """<!DOCTYPE html>
 <body>
     <div class="page-content">
         <h1>{{ product['name'] }}</h1>
-        {% for image in product['images'] %}
-        <img src="{{ image }}" alt="{{ product['name'] }}">
-        {% endfor %}
+        <div class="image-container">
+            {% for image in product['images'] %}
+            <img src="{{ image }}" alt="{{ product['name'] }}">
+            {% endfor %}
+        </div>
         <div class="product-info">
             <p><strong>描述：</strong> {{ product['description'] }}</p>
             <p><strong>尺寸：</strong> {{ product['size'] }}</p>

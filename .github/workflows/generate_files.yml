@@ -7,6 +7,7 @@ on:
     paths:
       - '*.jpg'  # 在提交包含 jpg 图片时触发
       - 'README.md'  # 在 README.md 文件变更时触发
+      - 'generate_files.py'  # 在 generate_files.py 文件变更时触发
 
 jobs:
   build:

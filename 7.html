@@ -24,24 +24,14 @@
             text-align: center;
             box-sizing: border-box;
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
         }
-        .images-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px;
-            flex-grow: 1;
-            overflow-y: auto;
-        }
-        .images-container img {
+        .page-content img {
             max-width: 100%;
+            max-height: 50.0%;
             height: auto;
-            margin-top: 10px;
-            /* 动态设置最大高度 */
-            max-height: 12.3cm;
+            width: auto;
+            margin-top: 20px;
+            object-fit: contain;
         }
         .product-info {
             margin-top: 20px;
@@ -51,7 +41,7 @@
             font-size: 18px;
         }
         .navigation {
-            margin-top: 20px;
+            margin-top: 30px;
         }
         .navigation a {
             margin-right: 10px;
@@ -70,34 +60,30 @@
             .navigation {
                 display: none;
             }
-            .images-container {
-                overflow: visible;
-            }
         }
     </style>
 </head>
 <body>
     <div class="page-content">
         <h1>关节蚂蚁</h1>
-        <div class="images-container">
-            
-            <img src="https://3d.lich.tech/7-关节蚂蚁-1.jpg" alt="关节蚂蚁">
-            
-            <img src="https://3d.lich.tech/7-关节蚂蚁.jpg" alt="关节蚂蚁">
-            
-        </div>
+        
+        <img src="https://3d.lich.tech/7-关节蚂蚁-1.jpg" alt="关节蚂蚁">
+        
+        <img src="https://3d.lich.tech/7-关节蚂蚁.jpg" alt="关节蚂蚁">
+        
         <div class="product-info">
             <p><strong>描述：</strong> 这是一个关节蚂蚁3D打印模型</p>
             <p><strong>尺寸：</strong> 未知尺寸</p>
         </div>
-        <div class="navigation">
-            
-            <a href="https://3d.lich.tech/6.html">上一页</a>
-            
-            
-            <a href="https://3d.lich.tech/8.html">下一页</a>
-            
-        </div>
+    </div>
+
+    <div class="navigation">
+        
+        <a href="https://3d.lich.tech/6.html">上一页</a>
+        
+        
+        <a href="https://3d.lich.tech/8.html">下一页</a>
+        
     </div>
 </body>
 </html>

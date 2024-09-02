@@ -7,8 +7,7 @@ markdown_template = """# 王叔叔3D打印工坊产品介绍
 |序号|模型名称  |模型尺寸|说明  |链接地址|
 |----|-------   |-------|--------|----|
 {% for product in products %}
-|{{ product.index }}|{{ product.name }}|{{ product.size }}|{{ product.description }}|[https://3d.lich.tech/{{ product.index }}.html](https://3d.lich.tech/{{ product.index }}.html)|
-{% endfor %}
+|{{ product.index }}|{{ product.name }}|{{ product.size }}|{{ product.description }}|[https://3d.lich.tech/{{ product.index }}.html](https://3d.lich.tech/{{ product.index }}.html)|{% endfor %}
 """
 
 html_template = """<!DOCTYPE html>
@@ -115,7 +114,7 @@ for file in sorted(os.listdir('.')):
         else:
             products[index]["images"].append(f"https://3d.lich.tech/{file}")
 
-# 生成 markdown
+# 生成 markdown 并写入 README.md
 with open("README.md", "w", encoding="utf-8") as md_file:
     md_content = jinja2.Template(markdown_template).render(products=products.values())
     md_file.write(md_content)
